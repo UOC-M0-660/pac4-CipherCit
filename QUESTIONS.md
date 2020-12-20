@@ -70,7 +70,7 @@ Los desarrolladores deben centrarse en los test unitarios por varias razones. So
 ### Inyección de dependencias
 
 #### Explica en qué consiste y por qué nos ayuda a mejorar nuestro código.
-Escribe aquí tu respuesta
+La inyección de dependencias consiste en crear las instancias de las dependencias fuera de la clase donde se utilizan, permitiendo así reducir el acomplamiento de estos elementos y haciendo posible la personalización de elementos de cada instancia segun el caso que necesitemos.
 
 #### Explica cómo se hace para aplicar inyección de dependencias de forma manual a un proyecto (sin utilizar librerías externas).
-Escribe aquí tu respuesta
+La inyección de dependencias puede hacerse de forma manual utilizando el constructor de la clase. Pasando las instancias de las dependencias ya creadas en el constructor evitamos instanciarlas dentro de esta.
