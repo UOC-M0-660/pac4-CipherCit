@@ -6,13 +6,21 @@ import android.os.Bundle
 import edu.uoc.pac4.R
 import edu.uoc.pac4.ui.login.LoginActivity
 import edu.uoc.pac4.data.SessionManager
+import edu.uoc.pac4.data.di.dataModule
 import edu.uoc.pac4.ui.streams.StreamsActivity
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 
 class LaunchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_launch)
         checkUserSession()
+
+        startKoin {
+            androidContext(applicationContext)
+            modules(dataModule)
+        }
     }
 
     private fun checkUserSession() {
