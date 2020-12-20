@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import edu.uoc.pac4.R
 import edu.uoc.pac4.data.SessionManager
+import edu.uoc.pac4.data.network.Network
 import edu.uoc.pac4.data.network.UnauthorizedException
 import edu.uoc.pac4.data.streams.StreamsRepository
 import edu.uoc.pac4.ui.login.LoginActivity
@@ -18,6 +19,7 @@ import edu.uoc.pac4.ui.profile.ProfileActivity
 import kotlinx.android.synthetic.main.activity_streams.*
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
 class StreamsActivity : AppCompatActivity() {
 
@@ -26,7 +28,9 @@ class StreamsActivity : AppCompatActivity() {
     private val adapter = StreamsAdapter()
     private val layoutManager = LinearLayoutManager(this)
 
-    private val streamsRepository: StreamsRepository by inject()
+    private val streamsRepository: StreamsRepository by inject {
+        parametersOf(Network.createHttpClient(applicationContext))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +92,7 @@ class StreamsActivity : AppCompatActivity() {
                     // Save cursor for next request
                     nextCursor = response.first
 
+                    // Show Error message to not leave the page empty
                     if (response.second.isEmpty()) {
                         Toast.makeText(
                             this@StreamsActivity,
@@ -95,16 +100,6 @@ class StreamsActivity : AppCompatActivity() {
                         ).show()
                     }
 
-                } ?: run {
-                    // Error :(
-
-                    // Show Error message to not leave the page empty
-                    if (adapter.currentList.isNullOrEmpty()) {
-                        Toast.makeText(
-                            this@StreamsActivity,
-                            getString(R.string.error_streams), Toast.LENGTH_SHORT
-                        ).show()
-                    }
                 }
                 // Hide Loading
                 swipeRefreshLayout.isRefreshing = false

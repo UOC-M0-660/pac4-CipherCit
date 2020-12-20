@@ -14,16 +14,25 @@ import androidx.lifecycle.lifecycleScope
 import edu.uoc.pac4.ui.LaunchActivity
 import edu.uoc.pac4.R
 import edu.uoc.pac4.data.SessionManager
-import edu.uoc.pac4.data.TwitchApiService
 import edu.uoc.pac4.data.network.Endpoints
 import edu.uoc.pac4.data.network.Network
+import edu.uoc.pac4.data.oauth.OAuthAuthenticationRepository
 import edu.uoc.pac4.data.oauth.OAuthConstants
 import kotlinx.android.synthetic.main.activity_oauth.*
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
 class OAuthActivity : AppCompatActivity() {
 
     private val TAG = "StreamsActivity"
+
+    private val authRepository: OAuthAuthenticationRepository by inject {
+        parametersOf(
+            SessionManager(this),
+            Network.createHttpClient(applicationContext)
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,28 +101,14 @@ class OAuthActivity : AppCompatActivity() {
         // Show Loading Indicator
         progressBar.visibility = View.VISIBLE
 
-        // Create Twitch Service
-        val service = TwitchApiService(Network.createHttpClient(this))
-        // Launch new thread attached to this Activity.
-        // If the Activity is closed, this Thread will be cancelled
         lifecycleScope.launch {
+            if (authRepository.login(authorizationCode)) {
+                progressBar.visibility = View.GONE
 
-            // Launch get Tokens Request
-            service.getTokens(authorizationCode)?.let { response ->
-                // Success :)
-
-                Log.d(TAG, "Got Access token ${response.accessToken}")
-
-                // Save access token and refresh token using the SessionManager class
-                val sessionManager = SessionManager(this@OAuthActivity)
-                sessionManager.saveAccessToken(response.accessToken)
-                response.refreshToken?.let {
-                    sessionManager.saveRefreshToken(it)
-                }
-            } ?: run {
-                // Failure :(
-
-                // Show Error Message
+                // Restart app to navigate to StreamsActivity
+                startActivity(Intent(this@OAuthActivity, LaunchActivity::class.java))
+                finish()
+            } else {
                 Toast.makeText(
                     this@OAuthActivity,
                     getString(R.string.error_oauth),
@@ -123,13 +118,6 @@ class OAuthActivity : AppCompatActivity() {
                 finish()
                 startActivity(Intent(this@OAuthActivity, OAuthActivity::class.java))
             }
-
-            // Hide Loading Indicator
-            progressBar.visibility = View.GONE
-
-            // Restart app to navigate to StreamsActivity
-            startActivity(Intent(this@OAuthActivity, LaunchActivity::class.java))
-            finish()
         }
     }
 }

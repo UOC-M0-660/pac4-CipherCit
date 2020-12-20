@@ -15,18 +15,29 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import edu.uoc.pac4.R
 import edu.uoc.pac4.ui.login.LoginActivity
 import edu.uoc.pac4.data.SessionManager
+import edu.uoc.pac4.data.network.Network
 import edu.uoc.pac4.data.network.UnauthorizedException
+import edu.uoc.pac4.data.oauth.AuthenticationRepository
 import edu.uoc.pac4.data.user.User
 import edu.uoc.pac4.data.user.UserRepository
 import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
 class ProfileActivity : AppCompatActivity() {
 
     private val TAG = "ProfileActivity"
 
-    private val userRepository: UserRepository by inject()
+    private val userRepository: UserRepository by inject {
+        parametersOf(Network.createHttpClient(applicationContext))
+    }
+
+    private val authRepository: AuthenticationRepository by inject {
+        parametersOf(
+            SessionManager(this),
+            Network.createHttpClient(applicationContext))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,9 +119,10 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun logout() {
-        // Clear local session data
-        SessionManager(this).clearAccessToken()
-        SessionManager(this).clearRefreshToken()
+        lifecycleScope.launch {
+            authRepository.logout()
+        }
+
         // Close this and all parent activities
         finishAffinity()
         // Open Login

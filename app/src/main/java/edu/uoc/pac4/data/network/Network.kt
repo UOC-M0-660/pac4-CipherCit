@@ -17,6 +17,7 @@ import io.ktor.http.*
 /**
  * Created by alex on 07/09/2020.
  */
+
 object Network {
 
     private const val TAG = "Network"
