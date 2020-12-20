@@ -9,52 +9,47 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import edu.uoc.pac4.R
-import edu.uoc.pac4.ui.login.LoginActivity
 import edu.uoc.pac4.data.SessionManager
-import edu.uoc.pac4.data.network.Network
-import edu.uoc.pac4.data.network.UnauthorizedException
-import edu.uoc.pac4.data.oauth.AuthenticationRepository
+import edu.uoc.pac4.ui.login.LoginActivity
 import edu.uoc.pac4.data.user.User
-import edu.uoc.pac4.data.user.UserRepository
 import kotlinx.android.synthetic.main.activity_profile.*
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
-import org.koin.core.parameter.parametersOf
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class ProfileActivity : AppCompatActivity() {
 
     private val TAG = "ProfileActivity"
 
-    private val userRepository: UserRepository by inject {
-        parametersOf(Network.createHttpClient(applicationContext))
-    }
-
-    private val authRepository: AuthenticationRepository by inject {
-        parametersOf(
-            SessionManager(this),
-            Network.createHttpClient(applicationContext))
-    }
+    private val viewModel: ProfileViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
         // Get User Profile
-        lifecycleScope.launch {
-            getUserProfile()
+
+        val userObservable = Observer<User> { user ->
+            setUserInfo(user)
+            progressBar.visibility = GONE
         }
+
+        viewModel.user.observe(this, userObservable)
+
+        progressBar.visibility = VISIBLE
+        viewModel.getUser()
+
         // Update Description Button Listener
         updateDescriptionButton.setOnClickListener {
             // Hide Keyboard
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             imm?.hideSoftInputFromWindow(it.windowToken, 0)
             // Update User Description
-            lifecycleScope.launch {
+            viewModel.updateUser(userDescriptionEditText.text?.toString() ?: "")
+            /*lifecycleScope.launch {
                 updateUserDescription(userDescriptionEditText.text?.toString() ?: "")
-            }
+            }*/
         }
         // Logout Button Listener
         logoutButton.setOnClickListener {
@@ -63,11 +58,13 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
+    /*
     private suspend fun getUserProfile() {
         progressBar.visibility = VISIBLE
         // Retrieve the Twitch User Profile using the API
+
         try {
-            userRepository.getUser()?.let { user ->
+            viewModel.getUser()?.let { user ->
                 // Success :)
                 // Update the UI with the user data
                 setUserInfo(user)
@@ -81,13 +78,12 @@ class ProfileActivity : AppCompatActivity() {
             onUnauthorized()
         }
     }
-
 
     private suspend fun updateUserDescription(description: String) {
         progressBar.visibility = VISIBLE
         // Update the Twitch User Description using the API
         try {
-            userRepository.updateUser(description)?.let { user ->
+            viewModel.updateUser(description)?.let { user ->
                 // Success :)
                 // Update the UI with the user data
                 setUserInfo(user)
@@ -101,6 +97,7 @@ class ProfileActivity : AppCompatActivity() {
             onUnauthorized()
         }
     }
+    */
 
     private fun setUserInfo(user: User) {
         // Set Texts
@@ -119,9 +116,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun logout() {
-        lifecycleScope.launch {
-            authRepository.logout()
-        }
+        viewModel.logout()
 
         // Close this and all parent activities
         finishAffinity()

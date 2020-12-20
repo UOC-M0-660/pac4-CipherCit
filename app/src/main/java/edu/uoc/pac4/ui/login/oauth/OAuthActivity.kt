@@ -10,29 +10,19 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Observer
 import edu.uoc.pac4.ui.LaunchActivity
 import edu.uoc.pac4.R
-import edu.uoc.pac4.data.SessionManager
 import edu.uoc.pac4.data.network.Endpoints
-import edu.uoc.pac4.data.network.Network
-import edu.uoc.pac4.data.oauth.OAuthAuthenticationRepository
 import edu.uoc.pac4.data.oauth.OAuthConstants
 import kotlinx.android.synthetic.main.activity_oauth.*
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
-import org.koin.core.parameter.parametersOf
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class OAuthActivity : AppCompatActivity() {
 
     private val TAG = "StreamsActivity"
 
-    private val authRepository: OAuthAuthenticationRepository by inject {
-        parametersOf(
-            SessionManager(this),
-            Network.createHttpClient(applicationContext)
-        )
-    }
+    private val viewModel: OAuthViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,7 +30,7 @@ class OAuthActivity : AppCompatActivity() {
         launchOAuthAuthorization()
     }
 
-    fun buildOAuthUri(): Uri {
+    private fun buildOAuthUri(): Uri {
         return Uri.parse(Endpoints.authorizationUrl)
             .buildUpon()
             .appendQueryParameter("client_id", OAuthConstants.clientID)
@@ -97,12 +87,11 @@ class OAuthActivity : AppCompatActivity() {
     // Call this method after obtaining the authorization code
     // on the WebView to obtain the tokens
     private fun onAuthorizationCodeRetrieved(authorizationCode: String) {
-
         // Show Loading Indicator
         progressBar.visibility = View.VISIBLE
 
-        lifecycleScope.launch {
-            if (authRepository.login(authorizationCode)) {
+        val userLoginObserver = Observer<Boolean> { isLoginCorrect ->
+            if (isLoginCorrect) {
                 progressBar.visibility = View.GONE
 
                 // Restart app to navigate to StreamsActivity
@@ -119,5 +108,9 @@ class OAuthActivity : AppCompatActivity() {
                 startActivity(Intent(this@OAuthActivity, OAuthActivity::class.java))
             }
         }
+
+        viewModel.isLoginCorrect.observe(this, userLoginObserver)
+
+        viewModel.login(authorizationCode)
     }
 }

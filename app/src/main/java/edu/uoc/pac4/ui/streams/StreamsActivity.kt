@@ -19,6 +19,7 @@ import edu.uoc.pac4.ui.profile.ProfileActivity
 import kotlinx.android.synthetic.main.activity_streams.*
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import org.koin.android.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class StreamsActivity : AppCompatActivity() {
@@ -28,9 +29,7 @@ class StreamsActivity : AppCompatActivity() {
     private val adapter = StreamsAdapter()
     private val layoutManager = LinearLayoutManager(this)
 
-    private val streamsRepository: StreamsRepository by inject {
-        parametersOf(Network.createHttpClient(applicationContext))
-    }
+    private val viewModel: StreamsViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,7 +75,7 @@ class StreamsActivity : AppCompatActivity() {
         // Get Twitch Streams
         lifecycleScope.launch {
             try {
-                streamsRepository.getStreams(cursor)?.let { response ->
+                viewModel.getStreams(cursor)?.let { response ->
                     // Success :)
                     Log.d("StreamsActivity", "Got Streams: $response")
 
