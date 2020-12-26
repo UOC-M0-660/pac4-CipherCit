@@ -1,5 +1,6 @@
 package edu.uoc.pac4.ui.login.oauth
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -20,8 +21,6 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class OAuthActivity : AppCompatActivity() {
 
-    private val TAG = "StreamsActivity"
-
     private val viewModel: OAuthViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +40,7 @@ class OAuthActivity : AppCompatActivity() {
             .build()
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private fun launchOAuthAuthorization() {
         //  Create URI
         val uri = buildOAuthUri()

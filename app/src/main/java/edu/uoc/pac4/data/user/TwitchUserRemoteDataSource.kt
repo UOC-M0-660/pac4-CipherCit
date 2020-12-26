@@ -8,7 +8,7 @@ import io.ktor.client.features.*
 import io.ktor.client.request.*
 
 class TwitchUserRemoteDataSource(private val httpClient: HttpClient) {
-  private val TAG = "TwitchUserRemoteDataSource"
+  private val tag = "TwitchUserRemoteDataSource"
 
   suspend fun getUser(): User? {
     try {
@@ -17,7 +17,7 @@ class TwitchUserRemoteDataSource(private val httpClient: HttpClient) {
 
       return response.data?.firstOrNull()
     } catch (t: Throwable) {
-      Log.w(TAG, "Error getting user", t)
+      Log.w(tag, "Error getting user", t)
       // Try to handle error
       return when (t) {
         is ClientRequestException -> {
@@ -41,7 +41,7 @@ class TwitchUserRemoteDataSource(private val httpClient: HttpClient) {
 
       return response.data?.firstOrNull()
     } catch (t: Throwable) {
-      Log.w(TAG, "Error updating user description", t)
+      Log.w(tag, "Error updating user description", t)
       // Try to handle error
       return when (t) {
         is ClientRequestException -> {

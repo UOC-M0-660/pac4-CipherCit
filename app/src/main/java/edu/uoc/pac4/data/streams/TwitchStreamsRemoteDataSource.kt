@@ -3,7 +3,6 @@ package edu.uoc.pac4.data.streams
 import android.util.Log
 import edu.uoc.pac4.data.SessionManager
 import edu.uoc.pac4.data.network.Endpoints
-import edu.uoc.pac4.data.network.UnauthorizedException
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
@@ -13,7 +12,7 @@ class TwitchStreamsRemoteDataSource (
     private val sessionManager: SessionManager
 ) {
 
-  private val TAG = "TwitchStreamsRemoteDataSource"
+  private val tag = "TwitchStreamsRemoteDataSource"
 
   suspend fun getStreams(cursor: String?): Pair<String?, List<Stream>> {
     try {
@@ -24,13 +23,13 @@ class TwitchStreamsRemoteDataSource (
 
       return Pair(response.pagination?.cursor, response.data.orEmpty())
     } catch (t: Throwable) {
-      Log.w(TAG, "Error getting streams", t)
+      Log.w(tag, "Error getting streams", t)
       // Try to handle error
       return when (t) {
         is ClientRequestException -> {
           // Check if it's a 401 Unauthorized
           if (t.response?.status?.value == 401) {
-            Log.w(TAG, "Unauthorized Error getting streams", t)
+            Log.w(tag, "Unauthorized Error getting streams", t)
             // Clear local access token
             sessionManager.clearAccessToken()
           }

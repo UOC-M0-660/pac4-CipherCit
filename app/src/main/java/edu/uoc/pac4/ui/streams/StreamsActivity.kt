@@ -17,7 +17,7 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class StreamsActivity : AppCompatActivity() {
 
-    private val TAG = "StreamsActivity"
+    private val tag = "StreamsActivity"
 
     private val adapter = StreamsAdapter()
     private val layoutManager = LinearLayoutManager(this)
@@ -85,7 +85,7 @@ class StreamsActivity : AppCompatActivity() {
 
     //private var nextCursor: String? = null
     private fun getStreams(cursor: String? = null) {
-        Log.d(TAG, "Requesting streams with cursor $cursor")
+        Log.d(tag, "Requesting streams with cursor $cursor")
 
         // Show Loading
         swipeRefreshLayout.isRefreshing = true

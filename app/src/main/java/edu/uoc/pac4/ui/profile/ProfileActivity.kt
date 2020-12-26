@@ -21,8 +21,6 @@ import org.koin.android.viewmodel.ext.android.viewModel
 
 class ProfileActivity : AppCompatActivity() {
 
-    private val TAG = "ProfileActivity"
-
     private val viewModel: ProfileViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,47 +56,6 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    /*
-    private suspend fun getUserProfile() {
-        progressBar.visibility = VISIBLE
-        // Retrieve the Twitch User Profile using the API
-
-        try {
-            viewModel.getUser()?.let { user ->
-                // Success :)
-                // Update the UI with the user data
-                setUserInfo(user)
-            } ?: run {
-                // Error :(
-                showError(getString(R.string.error_profile))
-            }
-            // Hide Loading
-            progressBar.visibility = GONE
-        } catch (t: UnauthorizedException) {
-            onUnauthorized()
-        }
-    }
-
-    private suspend fun updateUserDescription(description: String) {
-        progressBar.visibility = VISIBLE
-        // Update the Twitch User Description using the API
-        try {
-            viewModel.updateUser(description)?.let { user ->
-                // Success :)
-                // Update the UI with the user data
-                setUserInfo(user)
-            } ?: run {
-                // Error :(
-                showError(getString(R.string.error_profile))
-            }
-            // Hide Loading
-            progressBar.visibility = GONE
-        } catch (t: UnauthorizedException) {
-            onUnauthorized()
-        }
-    }
-    */
-
     private fun setUserInfo(user: User) {
         // Set Texts
         userNameTextView.text = user.userName
@@ -122,18 +79,6 @@ class ProfileActivity : AppCompatActivity() {
         finishAffinity()
         // Open Login
         startActivity(Intent(this, LoginActivity::class.java))
-    }
-
-    private fun onUnauthorized() {
-        // Clear local access token
-        SessionManager(this).clearAccessToken()
-        // User was logged out, close screen and all parent screens and open login
-        finishAffinity()
-        startActivity(Intent(this, LoginActivity::class.java))
-    }
-
-    private fun showError(text: String) {
-        Toast.makeText(this, text, Toast.LENGTH_LONG).show()
     }
 
     // Override Action Bar Home button to just finish the Activity

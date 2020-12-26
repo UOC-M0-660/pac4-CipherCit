@@ -10,9 +10,9 @@ class OAuthAuthenticationRemoteDataSource(
     private val sessionManager: SessionManager,
     private val httpClient: HttpClient,
 ) {
-  private val TAG = "OAuthAuthenticationRemoteDataSource"
+  private val tag = "OAuthAuthenticationRemoteDataSource"
 
-  suspend fun isUserAvailable(): Boolean {
+  fun isUserAvailable(): Boolean {
     return sessionManager.isUserAvailable()
   }
 
@@ -27,7 +27,7 @@ class OAuthAuthenticationRemoteDataSource(
             parameter("redirect_uri", OAuthConstants.redirectUri)
           }
 
-      Log.d(TAG, "Got Access token ${response.accessToken}")
+      Log.d(tag, "Got Access token ${response.accessToken}")
 
       // Save access token and refresh token using the SessionManager class
       sessionManager.saveAccessToken(response.accessToken)
@@ -37,12 +37,12 @@ class OAuthAuthenticationRemoteDataSource(
 
       return true
     } catch (t: Throwable) {
-      Log.w(TAG, "Error Getting Access token", t)
+      Log.w(tag, "Error Getting Access token", t)
       return false
     }
   }
 
-  suspend fun logout() {
+  fun logout() {
     sessionManager.clearAccessToken()
     sessionManager.clearRefreshToken()
   }

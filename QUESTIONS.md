@@ -74,3 +74,17 @@ La inyección de dependencias consiste en crear las instancias de las dependenci
 
 #### Explica cómo se hace para aplicar inyección de dependencias de forma manual a un proyecto (sin utilizar librerías externas).
 La inyección de dependencias puede hacerse de forma manual utilizando el constructor de la clase. Pasando las instancias de las dependencias ya creadas en el constructor evitamos instanciarlas dentro de esta.
+
+
+---
+
+### Análisis de código estático
+
+#### 5 errores o warnings que reporta Lint. Problemas de los que avisa y cómo corregirlos.
+
+1. `Missing 'content description' attribute on image` Indica la falta de un atributo en un elemento XML. Se soluciona definiendo este elemento.
+2. Obsolete Gradle Dependency `A new version of xxx is available` Indica que existe una nueva versión de una librería que tenemos especificada en nuestro archivo build.gradle. Se soluciona actualizando las librerías, cambiando el número de versión y sincronizando el proyecto.
+3. `Private property naming convention` Muestra las propiedades nombradas de manera incorrecta según la convención que marca cómo deben ser nombradas. La solución pasa por renombrar estas propiedades respetando las reglas establecidas.
+4. `Unused import directive` Indica los elementos que se están importando en las clases pero que no se están utilizando. Para solucionar esto deben eliminarse estos import.
+5. `Unnecessary local variable` Como su nombre indica, se está declarando una variable que no se utiliza, la solución será eliminar estas variables.
+
