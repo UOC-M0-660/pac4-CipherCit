@@ -24,9 +24,10 @@ val dataModule = module {
     single<AuthenticationRepository> { OAuthAuthenticationRepository(get()) }
     
     // data sources
-    single { TwitchStreamsRemoteDataSource(get()) }
+    single { TwitchStreamsRemoteDataSource(get(), get()) }
     single { TwitchUserRemoteDataSource(get()) }
-    single { OAuthAuthenticationRemoteDataSource(SessionManager(androidContext()), get()) }
+    single { OAuthAuthenticationRemoteDataSource(get(), get()) }
 
+    single {  SessionManager(androidContext()) }
     single { Network.createHttpClient(androidContext()) }
 }
