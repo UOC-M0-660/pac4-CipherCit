@@ -16,10 +16,8 @@ import kotlinx.coroutines.launch
 class LaunchViewModel(
     private val repository: AuthenticationRepository
 ) : ViewModel() {
-
     // Live Data
     val isUserAvailable = MutableLiveData<Boolean>()
-
 
     // Public function that can be called from the view (Activity)
     fun getUserAvailability() {

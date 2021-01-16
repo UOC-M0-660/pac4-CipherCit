@@ -1,5 +1,6 @@
 package edu.uoc.pac4.ui.login.oauth
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -10,20 +11,17 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Observer
 import edu.uoc.pac4.ui.LaunchActivity
 import edu.uoc.pac4.R
-import edu.uoc.pac4.data.SessionManager
-import edu.uoc.pac4.data.TwitchApiService
 import edu.uoc.pac4.data.network.Endpoints
-import edu.uoc.pac4.data.network.Network
 import edu.uoc.pac4.data.oauth.OAuthConstants
 import kotlinx.android.synthetic.main.activity_oauth.*
-import kotlinx.coroutines.launch
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class OAuthActivity : AppCompatActivity() {
 
-    private val TAG = "StreamsActivity"
+    private val viewModel: OAuthViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,7 +29,7 @@ class OAuthActivity : AppCompatActivity() {
         launchOAuthAuthorization()
     }
 
-    fun buildOAuthUri(): Uri {
+    private fun buildOAuthUri(): Uri {
         return Uri.parse(Endpoints.authorizationUrl)
             .buildUpon()
             .appendQueryParameter("client_id", OAuthConstants.clientID)
@@ -42,6 +40,7 @@ class OAuthActivity : AppCompatActivity() {
             .build()
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private fun launchOAuthAuthorization() {
         //  Create URI
         val uri = buildOAuthUri()
@@ -88,32 +87,17 @@ class OAuthActivity : AppCompatActivity() {
     // Call this method after obtaining the authorization code
     // on the WebView to obtain the tokens
     private fun onAuthorizationCodeRetrieved(authorizationCode: String) {
-
         // Show Loading Indicator
         progressBar.visibility = View.VISIBLE
 
-        // Create Twitch Service
-        val service = TwitchApiService(Network.createHttpClient(this))
-        // Launch new thread attached to this Activity.
-        // If the Activity is closed, this Thread will be cancelled
-        lifecycleScope.launch {
+        val userLoginObserver = Observer<Boolean> { isLoginCorrect ->
+            if (isLoginCorrect) {
+                progressBar.visibility = View.GONE
 
-            // Launch get Tokens Request
-            service.getTokens(authorizationCode)?.let { response ->
-                // Success :)
-
-                Log.d(TAG, "Got Access token ${response.accessToken}")
-
-                // Save access token and refresh token using the SessionManager class
-                val sessionManager = SessionManager(this@OAuthActivity)
-                sessionManager.saveAccessToken(response.accessToken)
-                response.refreshToken?.let {
-                    sessionManager.saveRefreshToken(it)
-                }
-            } ?: run {
-                // Failure :(
-
-                // Show Error Message
+                // Restart app to navigate to StreamsActivity
+                startActivity(Intent(this@OAuthActivity, LaunchActivity::class.java))
+                finish()
+            } else {
                 Toast.makeText(
                     this@OAuthActivity,
                     getString(R.string.error_oauth),
@@ -123,13 +107,10 @@ class OAuthActivity : AppCompatActivity() {
                 finish()
                 startActivity(Intent(this@OAuthActivity, OAuthActivity::class.java))
             }
-
-            // Hide Loading Indicator
-            progressBar.visibility = View.GONE
-
-            // Restart app to navigate to StreamsActivity
-            startActivity(Intent(this@OAuthActivity, LaunchActivity::class.java))
-            finish()
         }
+
+        viewModel.isLoginCorrect.observe(this, userLoginObserver)
+
+        viewModel.login(authorizationCode)
     }
 }

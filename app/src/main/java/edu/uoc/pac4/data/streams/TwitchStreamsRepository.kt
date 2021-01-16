@@ -5,11 +5,11 @@ package edu.uoc.pac4.data.streams
  */
 
 class TwitchStreamsRepository(
-    // TODO: Add any datasources you may need
-) : StreamsRepository {
+    private val remoteDataSource: TwitchStreamsRemoteDataSource
+): StreamsRepository {
 
     override suspend fun getStreams(cursor: String?): Pair<String?, List<Stream>> {
-        TODO("Not yet implemented")
+        // Aqui se gestionaría si recoger los datos del data source local o remoto
+        return remoteDataSource.getStreams(cursor)
     }
-
 }

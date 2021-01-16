@@ -12,5 +12,4 @@ interface AuthenticationRepository {
     suspend fun login(authorizationCode: String): Boolean
 
     suspend fun logout()
-
 }
